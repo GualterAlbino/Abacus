@@ -1,0 +1,28 @@
+npx prisma init
+//Cria os arquivos necessarios do prisma
+
+
+npx prisma generate
+//Gera a estrutura do banco baseada no Schema
+
+npx prisma db push
+//Cria o banco de dados
+
+npx ts-node-dev --respawn index.ts
+//Executa o Typescript no terminal (Igual ao nodemon)
+
+
+-------------------------------------------------------
+pacotes instalados:
+ts-node-dev@2.0.0
+
+prisma
+
+
+
+
+npm install prisma --save-dev
+npx prisma
+npm install @prisma/client
+
+Continuar depois https://www.youtube.com/watch?v=uApCW1gcpdE
