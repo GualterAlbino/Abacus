@@ -1,0 +1,14 @@
+Framework:
+Prisma
+
+Comandos:
+1. npm init -y
+2. npm install prisma ts-node-dev typescript @types/express -D
+3. npm install @prisma/client express
+4. npx tsc --init //Cria o arquivo tsconfig.json
+5. npx prisma init //Cria a estrutura do prisma
+6. npx prisma studio //Ferramenta do prisma para visualizar o banco online
+http://localhost:5555
+
+7. npx prisma migrate dev //Atualiza os campos criando uma nova migrate
+

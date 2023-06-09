@@ -1,5 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
   provider = "prisma-client-js"
@@ -7,17 +5,28 @@ generator client {
 
 datasource db {
   provider = "sqlite"
-  url      = "file:./dev.db"
+  url      = env("DATABASE_URL")
 }
 
-model Transacao {
 
-  id Int @id @default(autoincrement())
-  nome String 
-  valor Float
-  tipo String
-  data String
-  categoria String
-  descricao String?
-  
+model Transacao {
+  ID_TRANSACAO        Int     @id @default(autoincrement()) 
+  NOME_TRANSACAO      String
+  VALOR_TRANSACAO     Decimal
+  TIPO_TRANSACAO      String
+  DATA_TRANSACAO      DateTime
+  DESCRICAO_TRANSACAO String?
+
+  CATEGORIA_ID        Int
+  CATEGORIA_TRANSACAO Categoria @relation(fields: [CATEGORIA_ID], references: [ID_CATEGORIA])
+
+  @@map("TRANSACAO")
+}
+
+model Categoria {
+  ID_CATEGORIA          Int        @id @default(autoincrement())
+  DESCRICAO_CATEGORIA   String
+  TRANSACOES            Transacao[]
+
+  @@map("CATEGORIA")
 }
