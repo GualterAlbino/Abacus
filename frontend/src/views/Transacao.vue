@@ -493,34 +493,32 @@ export default {
     },
 
 
-    AtualizaGrafico() {
-      const categorias = [];
-      const valores = [];
+    AtualizarGrafico() {
+    const categories = [];
+    const data = [];
 
-      // Itera sobre as categorias retornadas
-      for (const categoria of this.categorias) {
-        // Adiciona a categoria ao array 'categories'
-        categorias.push(categoria.text);
+    // Iterar sobre as transações
+    for (const transacao of this.transacoes) {
+      const categoria = transacao.categoria.nome;
+      const valor = transacao.valor;
 
-        // Procura as transações correspondentes a essa categoria
-        const transacoesCategoria = this.transacoes.filter(
-          transacao => transacao.categoria === categoria.value
-        );
-
-        // Calcula o valor total das transações dessa categoria
-        const valorTotal = transacoesCategoria.reduce(
-          (total, transacao) => total + parseFloat(transacao.valor),
-          0
-        );
-
-        // Adiciona o valor total ao array 'valores'
-        valores.push(valorTotal);
+      // Verificar se a categoria já existe no array de categorias
+      const categoriaIndex = categories.indexOf(categoria);
+      if (categoriaIndex === -1) {
+        // Se não existir, adicioná-la ao array de categorias
+        categories.push(categoria);
+        // Inicializar o valor correspondente no array de data
+        data.push(valor);
+      } else {
+        // Se já existir, adicionar o valor ao valor existente no array de data
+        data[categoriaIndex] += valor;
       }
+    }
 
-      // Atualiza as propriedades 'categories' e 'data' do gráfico
-      this.options.xaxis.categories = categorias;
-      this.series[0].data = valores;
-    },
+    // Atualizar o estado do gráfico com as novas categorias e dados
+    this.options.xaxis.categories = categories;
+    this.series[0].data = data;
+  },
 
     editItem(item) {
       this.editedIndex = this.transacoes.indexOf(item)

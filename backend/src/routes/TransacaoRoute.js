@@ -11,6 +11,7 @@ class TransacaoRoute{
         app.route("/transacao").post(TransacaoController.adicionarTransacao)   
         app.route("/transacao/:id").post(TransacaoController.editarTransacao)
         app.route("/transacao/:id").delete(TransacaoController.deletarTransacao)
+        app.route("/transacaoMes/:data").get(TransacaoController.buscarTodasTransacoesDoMes)
     }
 }
 

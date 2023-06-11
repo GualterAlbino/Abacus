@@ -8,6 +8,11 @@ export default {
         return axios.get("http://localhost:3000/transacao").then((response) => response.data)
 
     },
+
+    async buscarTodasTransacoesDoMes(data){
+        return axios.get("http://localhost:3000/transacaoMes" +`/${data}`).then((response) => response.data)
+
+    },
     async buscarUmaTransacao(transacao){
         return axios.get("http://localhost:3000/transacao" +`/${transacao._id}`).then((response) => response.data)
 
