@@ -20,7 +20,7 @@ export default {
         return axios.post("http://localhost:3000/categoria"+`/${categoria._id}`,categoria).then((response) => response)
     },
 
-    async deletarCategoria(cateogria){
-        return axios.delete("http://localhost:3000/cateogria"+`/${cateogria._id}`).then((response) => response)
+    async deletarCategoria(categoria){
+        return axios.delete("http://localhost:3000/categoria"+`/${categoria._id}`).then((response) => response)
     }
 }

@@ -67,7 +67,8 @@ export default {
     items: 
       [
         { icon: 'mdi-home-outline', text: 'Return to me', to: '/'},
-        { icon: 'mdi-cash', text:'Contas', to: '/contas'},
+        { icon: 'mdi-cash', text:'Transações', to: '/contas'},
+        { icon: 'mdi-shape', text:'Categorias', to: '/categorias'},
         { icon: 'mdi-align-vertical-bottom', text: 'Histórico', to: '/historico'},
         { icon: 'mdi-cog-outline', text: 'Configurações', to: '/config'},
       ]

@@ -2,10 +2,11 @@
   <div>
     <v-row>
 
-      <!--Historico de Contas-->
+      <!--Historico de Transações-->
       <v-col cols="12" md="6">
         <v-card class="mt-5 mb-5 ml-5 mr-5">
-          <v-data-table :headers="cabecalho" :items="transacoes" sort-by="calories" class="elevation-5">
+          <v-data-table :headers="cabecalho" :items="transacoes" sort-by="data" class="elevation-5">
+
             <!--Parte superior da tabela-->
             <template v-slot:top>
               <v-toolbar flat>
@@ -178,7 +179,7 @@
               </v-toolbar>
             </template>
 
-            <!--Dialog de categorias-->
+            <!--Dialog de inclusão de novas categorias-->
             <v-dialog v-model="dialogCategoria" max-width="500px">
 
               <template v-slot:activator="{ on, attrs }">
@@ -256,15 +257,16 @@
               R$ {{ item.valor }}
             </template>
 
-            <!-- Exibe o nome da categoria em vez do ObjectId -->
+            <!-- Exibe o nome da categoria em vez do ObjectId 
             <template v-slot:item.categoria="{ item }">
               {{ item.categoria.nome }}
             </template>
-
+            -->
+            
             <!--Aplica a cor ao tipo RECEITA e DESPESA no historico de contas-->
-            <template v-slot:item.tipo="{ item }">
-              <div :class="item.tipo === 'Receita' ? 'green--text' : 'red--text'">
-                {{ item.tipo }}
+            <template v-slot:item.categoria ="{ item }">
+              <div :class="item.tipo == 'Receita' ? 'green--text' : 'red--text'">
+                {{ item.categoria.nome }}
               </div>
             </template>
 
@@ -278,6 +280,7 @@
 
       </v-col>
 
+      <!--Totalizadores ao fim da Página-->
       <v-col cols="12" md="6">
         <div>
           <apexchart width="500" type="bar" :options="options" :series="series"></apexchart>
@@ -339,7 +342,7 @@ export default {
       }
     },
     series: [{
-      data: [350, 150, 160, 100, 600, 257.86, 50, 120]
+      data: [150, 120, 160, 100, 600, 257.86, 50, 120]
     }]
 
 
@@ -371,8 +374,7 @@ export default {
 
       this.buscarTransacoes()
       this.buscarCategorias()
-      this.AtualizaGrafico()
-
+      //this.AtualizaGrafico()
 
     },
 
@@ -381,7 +383,6 @@ export default {
     buscarCategorias() {
       CategoriaHttpUtil.buscarTodasCategorias().then(categorias => {
         this.categorias = this.retornarElementos(categorias);
-        console.log(this.categorias)
 
       }).catch(() => {
         swal({
@@ -419,6 +420,10 @@ export default {
     },
 
     salvarCategoria() {
+      let dia = new Date().getUTCDate();
+      let mes = new Date().getUTCMonth();
+      let ano = new Date().getFullYear();
+      this.categoriaEdicao.data = `${dia}/0${mes + 1}/${ano}`
       CategoriaHttpUtil.adicionarCategoria(this.categoriaEdicao).then(resposta => {
         if ((resposta.status) < 299) {
           swal({
@@ -426,7 +431,7 @@ export default {
             text: "Categoria adicionada com sucesso!",
             icon: "success"
           })
-          //this.initialize()
+
           this.buscarCategorias()
           this.fecharCategoria()
         }
@@ -443,6 +448,10 @@ export default {
 
     //==>Grava a transação
     salvarTransacao() {
+      let DataSemFormatar //Variavel necessaria para retornar ao valor original (Componente calendario não funciona com a data formatada)
+
+      DataSemFormatar = this.itemEdicao.data
+      this.itemEdicao.data = this.dataFormatada
       TransacaoHttpUtil.adicionarTransacao(this.itemEdicao).then(resposta => {
         if ((resposta.status) < 299) {
           swal({
@@ -450,17 +459,21 @@ export default {
             text: "Transação adicionada com sucesso!",
             icon: "success"
           })
-          //this.initialize()
+
+          this.initialize()
           //this.cancelar()
+          this.itemEdicao.data = DataSemFormatar
         }
-        this.initialize()
+
+
       }).catch((error) => {
         swal({
           title: "Nada feito!",
-          text: "Não foi possivel cadastrar sua categoria.",
+          text: "Não foi possivel cadastrar sua transação.",
           icon: "error"
         });
         console.log(JSON.stringify(`[ADICIONAR TRANSAÇÃO] => ${error}`));
+
       });
     },
 
@@ -481,8 +494,32 @@ export default {
 
 
     AtualizaGrafico() {
-      this.options.xaxis.categories = this.categorias
-      this.series.data = this.transacoes.valor
+      const categorias = [];
+      const valores = [];
+
+      // Itera sobre as categorias retornadas
+      for (const categoria of this.categorias) {
+        // Adiciona a categoria ao array 'categories'
+        categorias.push(categoria.text);
+
+        // Procura as transações correspondentes a essa categoria
+        const transacoesCategoria = this.transacoes.filter(
+          transacao => transacao.categoria === categoria.value
+        );
+
+        // Calcula o valor total das transações dessa categoria
+        const valorTotal = transacoesCategoria.reduce(
+          (total, transacao) => total + parseFloat(transacao.valor),
+          0
+        );
+
+        // Adiciona o valor total ao array 'valores'
+        valores.push(valorTotal);
+      }
+
+      // Atualiza as propriedades 'categories' e 'data' do gráfico
+      this.options.xaxis.categories = categorias;
+      this.series[0].data = valores;
     },
 
     editItem(item) {
@@ -582,20 +619,21 @@ export default {
 
       this.dialog = false
     },
-
+    /*
     formatarData() {
       const [ano, mes, dia] = this.contaAtual.data.split('-')
       this.dataFormatada = `${dia}/${mes}/${ano}`;
       //this.dataFormatada = DateFormatterUtil.ISOtoBR(this.contaAtual.data)
       this.menuDataDialog = false
     },
+    */
     formatarData() {
       const [ano, mes, dia] = this.itemEdicao.data.split('-')
       this.dataFormatada = `${dia}/${mes}/${ano}`;
       //this.dataFormatada = DateFormatterUtil.ISOtoBR(this.contaAtual.data)
       this.menuDataDialog = false
-      this.itemEdicao.data = this.dataFormatada
     }
+
   },
 }
 </script>

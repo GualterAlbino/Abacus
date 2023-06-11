@@ -6,7 +6,7 @@ class TransacaoModel extends mongoose.Schema {
             nome:          { type: String, required: true },
             valor:         { type: Number, required: true },
             tipo:          { type: String/*enum :["Receita","Despesa"]*/},
-            data:          { type: String, required: true},
+            data:          { type: String, required: false},
             categoria:     { type: mongoose.Schema.ObjectId , ref: "CategoriaModel" }, //Foreign key para CategoriaModel
             descricao:     { type: String, required: false}
             
