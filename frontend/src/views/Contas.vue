@@ -30,12 +30,12 @@
 
                         <!--Dialog de Inclusão e Edição-->
                         <v-row>
-                          <v-col cols="12" sm="12">
-                            <v-text-field v-model="itemEdicao.name" label="Nome"></v-text-field>
+                          <v-col cols="12" sm="6">
+                            <v-text-field outlined v-model="itemEdicao.nome" label="Nome" hide-details></v-text-field>
                           </v-col>
 
                           <v-col cols="12" sm="6">
-                            <v-text-field v-model="itemEdicao.valor" label="Valor"></v-text-field>
+                            <v-text-field outlined v-model="itemEdicao.valor" label="Valor" hide-details></v-text-field>
                           </v-col>
 
                           <v-col cols="12" sm="6">
@@ -62,9 +62,72 @@
 
 
 
-                          <v-col cols="12" sm="6">
-                            <v-select :items="categoria" label="Categoria" v-model="itemEdicao.categoria" outlined
+                          <v-col cols="12" sm="8">
+                            <v-select :items="categorias" label="Categoria" v-model="itemEdicao.categoria" outlined
                               hide-details></v-select>
+                          </v-col>
+
+                          <!--Inclusão de categorias-->
+                          <v-col cols="12" sm="4">
+                            <template v-slot:activator="{ on, attrs }">
+                              <v-btn color="primary" dark class="mb-2" v-bind="attrs" v-on="on">Adicionar</v-btn>
+                            </template>
+
+
+                            <!--Dialog de  inclusão de novas categorias-->
+                            <v-dialog v-model="dialogCategoria" max-width="500px">
+
+                              <template v-slot:activator="{ on, attrs }">
+                                <v-btn color="primary" dark class="mb-2" v-bind="attrs" v-on="on">+</v-btn>
+                              </template>
+
+
+                              <v-card>
+                                <v-card-title>
+                                  <span class="text-h5">Nova Categoria</span>
+                                </v-card-title>
+
+                                <v-card-text>
+                                  <v-container>
+
+                                    <!--Dialog de Inclusão-->
+                                    <v-row>
+                                      <v-col cols="12" sm="12">
+                                        <v-text-field outlined v-model="categoriaEdicao.nome" label="Nome"></v-text-field>
+                                      </v-col>
+
+
+                                      <v-row>
+                                        <v-col cols="12">
+                                          <v-textarea outlined v-model="categoriaEdicao.descricao" label="Descrição"
+                                            hide-details></v-textarea>
+                                        </v-col>
+                                      </v-row>
+
+
+
+                                    </v-row>
+
+                                  </v-container>
+                                </v-card-text>
+
+                                <!--Botões Salvar e Cancelar da inclusão-->
+                                <v-card-actions>
+                                  <v-spacer></v-spacer>
+
+                                  <v-btn color="blue darken-1" text @click="fecharCategoria">
+                                    Cancelar
+                                  </v-btn>
+
+                                  <v-btn color="blue darken-1" text @click="salvarCategoria">
+                                    Salvar
+                                  </v-btn>
+
+                                </v-card-actions>
+
+                              </v-card>
+                            </v-dialog>
+
                           </v-col>
 
                           <v-row>
@@ -73,7 +136,6 @@
                                 hide-details></v-textarea>
                             </v-col>
                           </v-row>
-
 
 
                         </v-row>
@@ -89,7 +151,7 @@
                         Cancelar
                       </v-btn>
 
-                      <v-btn color="blue darken-1" text @click="save">
+                      <v-btn color="blue darken-1" text @click="salvar">
                         Salvar
                       </v-btn>
 
@@ -99,13 +161,15 @@
                 </v-dialog>
 
 
+
+                <!--Dialog de confirmação de exclusão-->
                 <v-dialog v-model="dialogDelete" width="auto">
                   <v-card>
                     <v-card-title class="text-h5">Tem certeza que deseja excluir?</v-card-title>
                     <v-card-actions>
                       <v-spacer></v-spacer>
-                      <v-btn color="primary" text @click="closeDelete">Não</v-btn>
-                      <v-btn color="primary" text @click="deleteItemConfirm">Sim</v-btn>
+                      <v-btn color="primary" text @click="fecharDialogExclusao">Não</v-btn>
+                      <v-btn color="primary" text @click="confirmaExclusaoTransacao">Sim</v-btn>
                       <v-spacer></v-spacer>
                     </v-card-actions>
                   </v-card>
@@ -114,23 +178,77 @@
               </v-toolbar>
             </template>
 
+            <!--Dialog de categorias-->
+            <v-dialog v-model="dialogCategoria" max-width="500px">
+
+              <template v-slot:activator="{ on, attrs }">
+                <v-btn color="primary" dark class="mb-2" v-bind="attrs" v-on="on">+</v-btn>
+              </template>
+
+
+              <v-card>
+                <v-card-title>
+                  <span class="text-h5">Nova Categoria</span>
+                </v-card-title>
+
+                <v-card-text>
+                  <v-container>
+
+                    <!--Dialog de Inclusão-->
+                    <v-row>
+                      <v-col cols="12" sm="12">
+                        <v-text-field outlined v-model="categoriaEdicao.nome" label="Nome"></v-text-field>
+                      </v-col>
+
+
+                      <v-row>
+                        <v-col cols="12">
+                          <v-textarea outlined v-model="categoriaEdicao.descricao" label="Descrição"
+                            hide-details></v-textarea>
+                        </v-col>
+                      </v-row>
+
+
+
+                    </v-row>
+
+                  </v-container>
+                </v-card-text>
+
+                <!--Botões Salvar e Cancelar da inclusão-->
+                <v-card-actions>
+                  <v-spacer></v-spacer>
+
+                  <v-btn color="blue darken-1" text @click="close">
+                    Cancelar
+                  </v-btn>
+
+                  <v-btn color="blue darken-1" text @click="salvar">
+                    Salvar
+                  </v-btn>
+
+                </v-card-actions>
+
+              </v-card>
+            </v-dialog>
+
             <!--Botões: EDITAR e EXCLUIR-->
             <template v-slot:item.actions="{ item }">
               <v-icon small class="mr-2" @click="editItem(item)">
                 mdi-pencil
               </v-icon>
 
-              <v-icon small @click="deleteItem(item)">
+              <v-icon small @click="dialogExclusão(item)">
                 mdi-delete
               </v-icon>
 
             </template>
 
-            <!--Mensagem exibida se não houver informações na tabela-->
+            <!--Informação exibida se não houver conta cadastrada no historico de contas-->
             <template v-slot:no-data>
-              <v-btn color="primary" @click="initialize">
-                Reset
-              </v-btn>
+              <v-row justify="center">
+                <v-subheader>Nenhuma conta cadastrada</v-subheader>
+              </v-row>
             </template>
 
             <!--Responsavel por definir duas casas decimais no historico de contas-->
@@ -138,12 +256,25 @@
               R$ {{ item.valor }}
             </template>
 
+            <!-- Exibe o nome da categoria em vez do ObjectId -->
+            <template v-slot:item.categoria="{ item }">
+              {{ item.categoria.nome }}
+            </template>
+
+            <!--Aplica a cor ao tipo RECEITA e DESPESA no historico de contas-->
+            <template v-slot:item.tipo="{ item }">
+              <div :class="item.tipo === 'Receita' ? 'green--text' : 'red--text'">
+                {{ item.tipo }}
+              </div>
+            </template>
+
+
           </v-data-table>
         </v-card>
 
 
 
-        
+
 
       </v-col>
 
@@ -169,23 +300,28 @@
 
 
 <script>
-
+import swal from 'sweetalert'
+import CategoriaHttpUtil from '../util/CategoriaHttpUtil'
+import TransacaoHttpUtil from '../util/TransacaoHttpUtil';
 
 export default {
   data: () => ({
     dataFormatada: "",
     dialog: false,
     dialogDelete: false,
+    dialogCategoria: false,
     editedIndex: -1,
-    totalDespesas:1875.79,
-    totalReceitas:2005.68,
+    totalDespesas: 1875.79,
+    totalReceitas: 2005.68,
+    transacaoExluir: null,
 
-
-    categoria: ["Fast-Food", "Água", "Luz", "Internet", "Mercado", "Açougue", "Skin", "Roupa"],
+    transacao: {},
+    categorias: ["Fast-Food", "Água", "Luz", "Internet", "Mercado", "Açougue", "Skin", "Roupa"],
     tipo: ["Receita", "Despesa"],
     transacoes: [],
     itemEdicao: { nome: '', valor: '', tipo: '', data: '', categoria: '', descricao: '' },
     itemInput: { nome: '', valor: '', tipo: '', data: '', categoria: '', descricao: '' },
+    categoriaEdicao: { nome: '', descricao: '' },
     cabecalho: [
       { text: 'Nome', align: 'start', value: 'nome', },
       { text: 'Valor', value: 'valor' },
@@ -193,10 +329,10 @@ export default {
       { text: 'Data', value: 'data' },
       { text: 'Ações', value: 'actions', sortable: false },
     ],
-    
-    
-    
-    //Indices do Fráfico
+
+
+
+    //Indices do Gráfico
     options: {
       xaxis: {
         categories: ["Fast-Food", "Água", "Luz", "Internet", "Mercado", "Açougue", "Skin", "Roupa"]
@@ -227,42 +363,199 @@ export default {
 
   created() {
     this.initialize()
-    this.AtualizaGrafico()
+    //this.AtualizaGrafico()
   },
 
   methods: {
     initialize() {
-      this.transacoes = [
-        { nome: 'Renda', valor: '1000', tipo: 'Receita', data: '03/06/2023', categoria: 'Sálario', descricao: 'Sálario do mÊs' },
-        { nome: 'Pizzas', valor: '1000', tipo: 'Despesa', data: '03/06/2023', categoria: 'Fast-Food', descricao: '' },
-        { nome: 'Água', valor: '150', tipo: 'Despa', data: '03/06/2023', categoria: 'Água', descricao: '' },
-        { nome: 'Luz', valor: '160', tipo: 'Despa', data: '03/06/2023', categoria: 'Luz', descricao: '' },
-        { nome: 'Água', valor: '150', tipo: 'Despa', data: '03/06/2023', categoria: 'Água', descricao: '' },
 
-      ]
+      this.buscarTransacoes()
+      this.buscarCategorias()
+      this.AtualizaGrafico()
+
+
     },
 
+
+    //==>Função que busca todas as categorias cadastradas
+    buscarCategorias() {
+      CategoriaHttpUtil.buscarTodasCategorias().then(categorias => {
+        this.categorias = this.retornarElementos(categorias);
+        console.log(this.categorias)
+
+      }).catch(() => {
+        swal({
+          title: "Erro interno!",
+          text: "Não foi possivel carregar as categorias cadastradas.",
+          icon: "error"
+        });
+      });
+    },
+
+    //==> Função que trata o retorno da busca pelas categorias [Object ID]
+    retornarElementos(array) {
+      const resultado = [];
+      for (const elemento of array) {
+        const { _id, nome } = elemento;
+        resultado.push({ value: _id, text: nome });
+      }
+      console.log(JSON.stringify(resultado));
+      return resultado;
+    },
+
+    //==>Fonção que busca todas as transações cadastradas
+    buscarTransacoes() {
+      TransacaoHttpUtil.buscarTodasTransacoes().then(transacoes => {
+        this.transacoes = transacoes
+        this.calcularTotal()
+
+      }).catch(() => {
+        swal({
+          title: "Erro interno!",
+          text: "Não foi possivel carregar as transações cadastradas.",
+          icon: "error"
+        });
+      });
+    },
+
+    salvarCategoria() {
+      CategoriaHttpUtil.adicionarCategoria(this.categoriaEdicao).then(resposta => {
+        if ((resposta.status) < 299) {
+          swal({
+            title: "Feito!",
+            text: "Categoria adicionada com sucesso!",
+            icon: "success"
+          })
+          //this.initialize()
+          this.buscarCategorias()
+          this.fecharCategoria()
+        }
+
+      }).catch((error) => {
+        swal({
+          title: "Nada feito!",
+          text: "Não foi possivel cadastrar sua categoria.",
+          icon: "error"
+        });
+        console.log(JSON.stringify(`[ADICIONAR CATEGORIA] => ${error}`));
+      });
+    },
+
+    //==>Grava a transação
+    salvarTransacao() {
+      TransacaoHttpUtil.adicionarTransacao(this.itemEdicao).then(resposta => {
+        if ((resposta.status) < 299) {
+          swal({
+            title: "Feito!",
+            text: "Transação adicionada com sucesso!",
+            icon: "success"
+          })
+          //this.initialize()
+          //this.cancelar()
+        }
+        this.initialize()
+      }).catch((error) => {
+        swal({
+          title: "Nada feito!",
+          text: "Não foi possivel cadastrar sua categoria.",
+          icon: "error"
+        });
+        console.log(JSON.stringify(`[ADICIONAR TRANSAÇÃO] => ${error}`));
+      });
+    },
+
+
+    //==> Função que realiza o calculo geral das receitas e despesas
+    calcularTotal() {
+      this.totalReceitas = 0;
+      this.totalDespesas = 0;
+
+      this.transacoes.forEach(transacao => {
+        if (transacao.tipo === 'Receita') {
+          this.totalReceitas += parseFloat(transacao.valor);
+        } else if (transacao.tipo === 'Despesa') {
+          this.totalDespesas += parseFloat(transacao.valor);
+        }
+      });
+    },
+
+
     AtualizaGrafico() {
-      //this.options.xaxis.categories = this.categorias
-      //this.series.data = this.transacoes.valor
+      this.options.xaxis.categories = this.categorias
+      this.series.data = this.transacoes.valor
     },
 
     editItem(item) {
       this.editedIndex = this.transacoes.indexOf(item)
       this.itemEdicao = Object.assign({}, item)
       this.dialog = true
+
     },
 
-    deleteItem(item) {
-      this.editedIndex = this.transacoes.indexOf(item)
-      this.itemEdicao = Object.assign({}, item)
+    editarTransacao() {
+      console.log("Item edição:")
+      console.log(this.itemEdicao)
+      TransacaoHttpUtil.editarTransacao(this.itemEdicao)
+        .then(resposta => {
+          if (resposta.status < 299) {
+            swal({
+              title: "Feito!",
+              text: "Produto editado com sucesso!",
+              icon: "success"
+            });
+
+            this.initialize();
+          }
+
+
+        }).catch((error) => {
+          swal({
+            title: "Nada feito!",
+            text: "Não foi possivel realizar a edição.",
+            icon: "error"
+          });
+          console.log(JSON.stringify(`[EDITAR PRODUTO] => ${error}`))
+        });
+    },
+
+
+
+    //==>Dialog de confirmar exclusão
+    dialogExclusão(item) {
       this.dialogDelete = true
+      this.transacaoExluir = item
     },
 
-    deleteItemConfirm() {
-      this.transacoes.splice(this.editedIndex, 1)
-      this.closeDelete()
+    //==>Operação de exclusão
+    confirmaExclusaoTransacao() {
+      TransacaoHttpUtil.deletarTransacao(this.transacaoExluir)
+        .then(resposta => {
+          if (resposta.status < 299) {
+            swal({
+              title: "Feito!",
+              text: "Transação excluída com sucesso!",
+              icon: "success"
+            });
+            this.confirmarExclusaoDialog = false;
+            this.initialize();
+          }
+
+          this.fecharDialogExclusao()
+        }).catch((error) => {
+          swal({
+            title: "Nada feito!",
+            text: "Não foi possivel realizar a exclusão.",
+            icon: "error"
+          });
+          console.log(JSON.stringify(`[EXCLUIR TRANSAÇÃO] => ${error}`))
+        });
     },
+
+    //==>Fecha a tela de exclusão
+    fecharDialogExclusao() {
+      this.dialogDelete = false
+    },
+
 
     close() {
       this.dialog = false
@@ -272,22 +565,22 @@ export default {
       })
     },
 
-    closeDelete() {
-      this.dialogDelete = false
-      this.$nextTick(() => {
-        this.itemEdicao = Object.assign({}, this.itemInput)
-        this.editedIndex = -1
-      })
+    //==> Fecha a tela de inclusão de categoria
+    fecharCategoria() {
+      this.dialogCategoria = false
+
     },
 
-    save() {
-      if (this.editedIndex > -1) {
-        Object.assign(this.transacoes[this.editedIndex], this.itemEdicao)
+    //==> Função chamada ao apertar o botão SALVAR
+    salvar() {
+      //==> Verifica se o produto já existe para salvar, se sim, ele o edita
+      if (!this.itemEdicao._id) {
+        this.salvarTransacao()
       } else {
-        this.transacoes.push(this.itemEdicao)
+        this.editarTransacao()
       }
-      console.log(this.itemEdicao)
-      this.close()
+
+      this.dialog = false
     },
 
     formatarData() {
