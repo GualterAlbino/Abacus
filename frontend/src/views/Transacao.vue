@@ -10,16 +10,31 @@
             <!--Parte superior da tabela-->
             <template v-slot:top>
               <v-toolbar flat>
-                <v-toolbar-title>Transações</v-toolbar-title>
-                <v-divider class="mx-4" inset vertical></v-divider>
-                <v-spacer></v-spacer>
+
+
+                <v-row class="mt-2">
+                  <v-col cols="12" sm="4">
+                    <v-select :items="inputMeses" label="Mês" v-model="inputMesFiltro" outlined hide-details></v-select>
+                  </v-col>
+
+
+                  <v-col cols="12" sm="4">
+                    <v-text-field outlined v-model="inputAnoFiltro" label="Ano" hide-details></v-text-field>
+                  </v-col>
+
+                  <v-col cols="12" sm="4">
+                    <v-btn color="primary" dark class="mb-2" v-bind="attrs" @click="buscarTransacoes"
+                      v-on="on">Buscar</v-btn>
+                  </v-col>
+
+
+                </v-row>
 
                 <v-dialog v-model="dialog" max-width="500px">
 
                   <template v-slot:activator="{ on, attrs }">
-                    <v-btn color="primary" dark class="mb-2" v-bind="attrs" v-on="on">Adicionar</v-btn>
+                    <v-btn color="primary" dark class="mb-2" v-bind="attrs" v-on="on">+</v-btn>
                   </template>
-
 
                   <v-card>
                     <v-card-title>
@@ -58,8 +73,6 @@
                             </v-menu>
 
                           </v-col>
-
-
 
 
 
@@ -262,9 +275,9 @@
               {{ item.categoria.nome }}
             </template>
             -->
-            
+
             <!--Aplica a cor ao tipo RECEITA e DESPESA no historico de contas-->
-            <template v-slot:item.categoria ="{ item }">
+            <template v-slot:item.categoria="{ item }">
               <div :class="item.tipo == 'Receita' ? 'green--text' : 'red--text'">
                 {{ item.categoria.nome }}
               </div>
@@ -285,6 +298,8 @@
         <div>
           <apexchart width="500" type="bar" :options="options" :series="series"></apexchart>
         </div>
+
+        
 
         <!--Totalizadores ao fim da página-->
         <v-card color="green" class="my-4">
@@ -318,11 +333,16 @@ export default {
     totalReceitas: 2005.68,
     transacaoExluir: null,
 
+    inputMeses: ["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"],
+    inputMesFiltro: '',
+    inputAnoFiltro: new Date().getFullYear(),
+
+
     transacao: {},
     categorias: ["Fast-Food", "Água", "Luz", "Internet", "Mercado", "Açougue", "Skin", "Roupa"],
     tipo: ["Receita", "Despesa"],
     transacoes: [],
-    itemEdicao: { nome: '', valor: '', tipo: '', data: '', categoria: '', descricao: '', dia: '', mes: '', ano:'' },
+    itemEdicao: { nome: '', valor: '', tipo: '', data: '', categoria: '', descricao: '', dia: '', mes: '', ano: '' },
     itemInput: { nome: '', valor: '', tipo: '', data: '', categoria: '', descricao: '' },
     categoriaEdicao: { nome: '', descricao: '' },
     cabecalho: [
@@ -406,16 +426,20 @@ export default {
 
     //==>Fonção que busca todas as transações cadastradas
     buscarTransacoes() {
-      TransacaoHttpUtil.buscarTodasTransacoes().then(transacoes => {
+      let data = `00-${this.inputMesFiltro}-${this.inputAnoFiltro}`
+
+      TransacaoHttpUtil.buscarTodasTransacoesDoMes(data).then(transacoes => {
         this.transacoes = transacoes
-        this.calcularTotal()
         console.log(JSON.stringify(this.transacoes));
-      }).catch(() => {
+        this.calcularTotal()
+
+      }).catch((error) => {
         swal({
           title: "Erro interno!",
           text: "Não foi possivel carregar as transações cadastradas.",
           icon: "error"
         });
+        console.log(JSON.stringify(`[BUSCAR TRANSAÇÕES DO MES] => ${error}`));
       });
     },
 
@@ -494,31 +518,31 @@ export default {
 
 
     AtualizarGrafico() {
-    const categories = [];
-    const data = [];
+      const categories = [];
+      const data = [];
 
-    // Iterar sobre as transações
-    for (const transacao of this.transacoes) {
-      const categoria = transacao.categoria.nome;
-      const valor = transacao.valor;
+      // Iterar sobre as transações
+      for (const transacao of this.transacoes) {
+        const categoria = transacao.categoria.nome;
+        const valor = transacao.valor;
 
-      // Verificar se a categoria já existe no array de categorias
-      const categoriaIndex = categories.indexOf(categoria);
-      if (categoriaIndex === -1) {
-        // Se não existir, adicioná-la ao array de categorias
-        categories.push(categoria);
-        // Inicializar o valor correspondente no array de data
-        data.push(valor);
-      } else {
-        // Se já existir, adicionar o valor ao valor existente no array de data
-        data[categoriaIndex] += valor;
+        // Verificar se a categoria já existe no array de categorias
+        const categoriaIndex = categories.indexOf(categoria);
+        if (categoriaIndex === -1) {
+          // Se não existir, adicioná-la ao array de categorias
+          categories.push(categoria);
+          // Inicializar o valor correspondente no array de data
+          data.push(valor);
+        } else {
+          // Se já existir, adicionar o valor ao valor existente no array de data
+          data[categoriaIndex] += valor;
+        }
       }
-    }
 
-    // Atualizar o estado do gráfico com as novas categorias e dados
-    this.options.xaxis.categories = categories;
-    this.series[0].data = data;
-  },
+      // Atualizar o estado do gráfico com as novas categorias e dados
+      this.options.xaxis.categories = categories;
+      this.series[0].data = data;
+    },
 
     editItem(item) {
       this.editedIndex = this.transacoes.indexOf(item)
