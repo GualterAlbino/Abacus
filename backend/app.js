@@ -4,6 +4,7 @@ const cors = require("cors")
 //Importando os Models
 const CategoriaModel = require ("./src/model/CategoriaModel");
 const TransacaoModel = require("./src/model/TransacaoModel");
+const UsuarioModel = require("./src/model/UsuarioModel")
 
 //Configurações do DOTENV para variaveis de ambiente
 const dotenv = require('dotenv');
@@ -36,6 +37,7 @@ class App {
         //Instanciando as tabelas
         new CategoriaModel();
         new TransacaoModel();
+        new UsuarioModel();
 
 
         //Instanciando as rotas
@@ -47,6 +49,9 @@ class App {
         
         const TransacaoRoute = require("./src/routes/TransacaoRoute");
         new TransacaoRoute(app);
+
+        const UsuarioRoute = require("./src/routes/UsuarioRoute");
+        new UsuarioRoute(app);
 
      
     }

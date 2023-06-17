@@ -25,6 +25,11 @@ const routes = [
     path: '/historico',
     name: 'historico',
     component: () => import('../views/Historico.vue')
+  },
+  {
+    path: '/config',
+    name: 'configuracao',
+    component: () => import('../views/Configuracao.vue')
   }
 
 ]

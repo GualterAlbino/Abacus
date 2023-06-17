@@ -1,6 +1,5 @@
 const mongoose = require("mongoose");
-const bcrypt = require(`bcryptjs`);
-const jwt = require(`jsonwebtoken`);
+
 
 //Definição da estrutura do Usuario dentro do banco
 

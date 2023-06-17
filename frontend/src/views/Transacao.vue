@@ -23,8 +23,14 @@
                   </v-col>
 
                   <v-col cols="12" sm="4">
-                    <v-btn color="primary" dark class="mb-2" v-bind="attrs" @click="buscarTransacoes"
-                      v-on="on">Buscar</v-btn>
+                    <!--v-btn color="primary" dark class="mb-2" v-bind="attrs" @click="buscarTransacoes"
+                      v-on="on">Buscar</v-btn-->
+
+                    <v-btn color="primary" dark class="mb-2" fab v-bind="attrs" @click="buscarTransacoes" v-on="on">
+                      <v-icon dark>
+                        mdi-magnify
+                      </v-icon>
+                    </v-btn>
                   </v-col>
 
 
@@ -33,7 +39,13 @@
                 <v-dialog v-model="dialog" max-width="500px">
 
                   <template v-slot:activator="{ on, attrs }">
-                    <v-btn color="primary" dark class="mb-2" v-bind="attrs" v-on="on">+</v-btn>
+                    <!--v-btn color="primary" dark class="mb-2" v-bind="attrs" v-on="on">+</v-btn-->
+
+                    <v-btn color="primary" dark class="mt-2" fab v-bind="attrs" v-on="on">
+                      <v-icon dark>
+                        mdi-plus
+                      </v-icon>
+                    </v-btn>
                   </template>
 
                   <v-card>
@@ -92,7 +104,13 @@
                             <v-dialog v-model="dialogCategoria" max-width="500px">
 
                               <template v-slot:activator="{ on, attrs }">
-                                <v-btn color="primary" dark class="mb-2" v-bind="attrs" v-on="on">+</v-btn>
+                                <!--v-btn color="primary" dark class="mb-2" v-bind="attrs" v-on="on">+</v-btn-->
+
+                                <v-btn color="primary" dark class="mb-2" fab v-bind="attrs" v-on="on">
+                                  <v-icon dark>
+                                    mdi-plus
+                                  </v-icon>
+                                </v-btn>
                               </template>
 
 
@@ -299,7 +317,7 @@
           <apexchart width="500" type="bar" :options="options" :series="series"></apexchart>
         </div>
 
-        
+
 
         <!--Totalizadores ao fim da página-->
         <v-card color="green" class="my-4">
