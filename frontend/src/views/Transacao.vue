@@ -322,7 +322,7 @@ export default {
     categorias: ["Fast-Food", "Água", "Luz", "Internet", "Mercado", "Açougue", "Skin", "Roupa"],
     tipo: ["Receita", "Despesa"],
     transacoes: [],
-    itemEdicao: { nome: '', valor: '', tipo: '', data: '', categoria: '', descricao: '' },
+    itemEdicao: { nome: '', valor: '', tipo: '', data: '', categoria: '', descricao: '', dia: '', mes: '', ano:'' },
     itemInput: { nome: '', valor: '', tipo: '', data: '', categoria: '', descricao: '' },
     categoriaEdicao: { nome: '', descricao: '' },
     cabecalho: [
@@ -409,7 +409,7 @@ export default {
       TransacaoHttpUtil.buscarTodasTransacoes().then(transacoes => {
         this.transacoes = transacoes
         this.calcularTotal()
-
+        console.log(JSON.stringify(this.transacoes));
       }).catch(() => {
         swal({
           title: "Erro interno!",
@@ -617,17 +617,13 @@ export default {
 
       this.dialog = false
     },
-    /*
-    formatarData() {
-      const [ano, mes, dia] = this.contaAtual.data.split('-')
-      this.dataFormatada = `${dia}/${mes}/${ano}`;
-      //this.dataFormatada = DateFormatterUtil.ISOtoBR(this.contaAtual.data)
-      this.menuDataDialog = false
-    },
-    */
+
     formatarData() {
       const [ano, mes, dia] = this.itemEdicao.data.split('-')
       this.dataFormatada = `${dia}/${mes}/${ano}`;
+      this.itemEdicao.dia = dia
+      this.itemEdicao.mes = mes
+      this.itemEdicao.ano = ano
       //this.dataFormatada = DateFormatterUtil.ISOtoBR(this.contaAtual.data)
       this.menuDataDialog = false
     }

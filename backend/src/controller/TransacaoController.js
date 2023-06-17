@@ -23,27 +23,22 @@ class TransacaoController {
     static async buscarTodasTransacoesDoMes(req, res) {
         try {
             const data = req.params.data; // Recebe a data fornecida na requisição
+            console.log(data)
+            const partesData = data.split('-'); // Divide a data em dia, mês e ano
+            const QueryMes = partesData[1]; // Obtém o mês como número
+            const QueryAno = partesData[2]; // Obtém o ano como número
+         
+            //Como o operador "IGUAL A" exige que utilize o FindOnde, foi necessario realizar o maior igual e menor igual para reproduzir esse comportamento
+            res.status(200).json(await TransacaoModel.find(
+                { $and: [
+                    {mes : {$gte: QueryMes}}, {mes : {$lte: QueryMes}},
+                    {ano : {$gte: QueryAno}},{ano : {$lte: QueryAno}} 
+                ]}
+            ).populate('categoria'))
+
+           
+    
             
-            const partesData = data.split('/'); // Divide a data em dia, mês e ano
-            const mes = parseInt(partesData[1]); // Obtém o mês como número
-            const ano = parseInt(partesData[2]); // Obtém o ano como número
-    
-            const transacoes = await TransacaoModel.aggregate([
-                {
-                    $match: {
-                        $expr: {
-                            $and: [
-                                { $eq: [{ $month: { $toDate: "$data" } }, mes] },
-                                { $eq: [{ $year: { $toDate: "$data" } }, ano] }
-                            ]
-                        }
-                    }
-                },
-                { $lookup: { from: "categorias", localField: "categoria", foreignField: "_id", as: "categoria" } },
-                { $unwind: "$categoria" }
-            ]);
-    
-            res.status(200).json(transacoes);
         } catch (error) {
             console.log("[ TRANSAÇÃO ] : BUSCAR TODAS TRANSAÇÕES => ERRO" + error);
             res.status(500).send("Erro ao buscar transações");

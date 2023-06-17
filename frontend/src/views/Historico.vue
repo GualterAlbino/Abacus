@@ -10,17 +10,27 @@
                         <!--Parte superior da tabela-->
                         <template v-slot:top>
                             <v-toolbar flat>
+                                
 
                                 <v-spacer></v-spacer>
-                                <v-row>
-                                    <v-col cols="12" sm="6">
-                                        <v-select :items="meses" label="Mês" v-model="mesSelecionado" outlined
+                                <v-row class="mt-2">
+                                    <v-col cols="12" sm="4">
+                                        <v-select :items="inputMeses" label="Mês" v-model="inputMesFiltro" outlined
                                             hide-details></v-select>
                                     </v-col>
 
-                                    <v-col cols="12" sm="6">
-                                        <v-btn color="primary" dark class="mb-2" v-bind="attrs" @click="buscarTransacoes" v-on="on">Pesquisar</v-btn>
+                            
+                                    <v-col cols="12" sm="4">
+                                        <v-text-field outlined v-model="inputAnoFiltro" label="Ano"
+                                            hide-details></v-text-field>
                                     </v-col>
+
+                                    <v-col cols="12" sm="4">
+                                        <v-btn color="primary" dark class="mb-2" v-bind="attrs" @click="buscarTransacoes"
+                                            v-on="on">Pesquisar</v-btn>
+                                    </v-col>
+
+
                                 </v-row>
 
 
@@ -336,14 +346,16 @@ export default {
         totalDespesas: 0,
         totalReceitas: 0,
         transacaoExluir: null,
-        meses: ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro","Outubro","Novembro","Dezembro"],
-        mesSelecionado: '',
+        inputMeses: ["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"],
+        inputMesFiltro : '',
+        inputAnoFiltro: new Date().getFullYear(),
+       
 
         transacao: {},
         categorias: [],
         tipo: ["Receita", "Despesa"],
         transacoes: [],
-        itemEdicao: { nome: '', valor: '', tipo: '', data: '', categoria: '', descricao: '' },
+        itemEdicao: { nome: '', valor: '', tipo: '', data: '', categoria: '', descricao: '', dia: '', mes: '', ano: '' },
         itemInput: { nome: '', valor: '', tipo: '', data: '', categoria: '', descricao: '' },
         categoriaEdicao: { nome: '', descricao: '' },
         cabecalho: [
@@ -427,10 +439,11 @@ export default {
 
         //==>Fonção que busca todas as transações cadastradas
         buscarTransacoes() {
-            let data = '11/01/2023'
+            let data = `00-${this.inputMesFiltro}-${this.inputAnoFiltro}`
 
             TransacaoHttpUtil.buscarTodasTransacoesDoMes(data).then(transacoes => {
                 this.transacoes = transacoes
+                console.log(JSON.stringify(this.transacoes));
                 this.calcularTotal()
 
             }).catch((error) => {
@@ -439,7 +452,7 @@ export default {
                     text: "Não foi possivel carregar as transações cadastradas.",
                     icon: "error"
                 });
-                console.log(error)
+                console.log(JSON.stringify(`[BUSCAR TRANSAÇÕES DO MES] => ${error}`));
             });
         },
 
@@ -515,7 +528,7 @@ export default {
                 }
             });
         },
-
+        
 
         AtualizarGrafico() {
             const categories = [];
@@ -651,7 +664,7 @@ export default {
         */
         formatarData() {
             const [ano, mes, dia] = this.itemEdicao.data.split('-')
-            this.dataFormatada = `${dia}/${mes}/${ano}`;
+            this.dataFormatada = `${dia}-${mes}-${ano}`;
             //this.dataFormatada = DateFormatterUtil.ISOtoBR(this.contaAtual.data)
             this.menuDataDialog = false
         }
