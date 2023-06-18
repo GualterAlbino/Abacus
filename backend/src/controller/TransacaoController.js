@@ -49,10 +49,9 @@ class TransacaoController {
         try {
             // Recebe a data fornecida na requisição
             const {dataInicial, dataFinal } = req.params
-            //const dataFinal = req.params.dataFinalFormatada;
 
-            console.log("Data inicial:" + dataInicial)
-            console.log("Data Final:" + dataFinal)
+            //console.log("Data inicial:" + dataInicial)
+            //console.log("Data Final:" + dataFinal)
             
 
             const partesDataInicial = dataInicial.split('-'); // Divide a data em dia, mês e ano

@@ -78,7 +78,7 @@
                             <v-menu ref="menuDataDialog" v-model="menuDataDialog" :close-on-content-click="false"
                               transition="scale-transition" offset-y max-width="290px" min-width="auto">
                               <template v-slot:activator="{ on }">
-                                <v-text-field v-model="dataFormatada" label="Data" prepend-icon="mdi-calendar" outlined
+                                <v-text-field v-model="itemEdicao.data" label="Data" prepend-icon="mdi-calendar" outlined
                                   readonly v-on="on" hide-details></v-text-field>
                               </template>
                               <v-date-picker v-model="itemEdicao.data" no-title @input="formatarData"></v-date-picker>
@@ -279,7 +279,7 @@
             <!--Informação exibida se não houver conta cadastrada no historico de contas-->
             <template v-slot:no-data>
               <v-row justify="center">
-                <v-subheader>Nenhuma conta cadastrada</v-subheader>
+                <v-subheader>Nenhuma conta cadastrada/encontrada</v-subheader>
               </v-row>
             </template>
 
@@ -288,11 +288,6 @@
               R$ {{ item.valor }}
             </template>
 
-            <!-- Exibe o nome da categoria em vez do ObjectId 
-            <template v-slot:item.categoria="{ item }">
-              {{ item.categoria.nome }}
-            </template>
-            -->
 
             <!--Aplica a cor ao tipo RECEITA e DESPESA no historico de contas-->
             <template v-slot:item.categoria="{ item }">
@@ -320,13 +315,16 @@
 
 
         <!--Totalizadores ao fim da página-->
-        <v-card color="green" class="my-4">
-          <v-card-title>Receitas: R${{ totalReceitas }}</v-card-title>
-        </v-card>
+        <v-col cols="12" md="11">
+          <v-card color="green" class="my-4">
+            <v-card-title>Receitas: R${{ totalReceitas }}</v-card-title>
+          </v-card>
 
-        <v-card color="red" class="my-4">
-          <v-card-title>Despesas: R${{ totalDespesas }}</v-card-title>
-        </v-card>
+          <v-card color="red" class="my-4">
+            <v-card-title>Despesas: R${{ totalDespesas }}</v-card-title>
+          </v-card>
+        </v-col>
+
       </v-col>
 
     </v-row>
@@ -357,7 +355,7 @@ export default {
 
 
     transacao: {},
-    categorias: ["Fast-Food", "Água", "Luz", "Internet", "Mercado", "Açougue", "Skin", "Roupa"],
+    categorias: [],
     tipo: ["Receita", "Despesa"],
     transacoes: [],
     itemEdicao: { nome: '', valor: '', tipo: '', data: '', categoria: '', descricao: '', dia: '', mes: '', ano: '' },
@@ -376,11 +374,11 @@ export default {
     //Indices do Gráfico
     options: {
       xaxis: {
-        categories: ["Fast-Food", "Água", "Luz", "Internet", "Mercado", "Açougue", "Skin", "Roupa"]
+        categories: []
       }
     },
     series: [{
-      data: [150, 120, 160, 100, 600, 257.86, 50, 120]
+      data: []
     }]
 
 
@@ -396,24 +394,24 @@ export default {
   watch: {
     dialog(val) {
       val || this.close()
-     
+
     },
     dialogDelete(val) {
       val || this.closeDelete()
     },
+
   },
 
   created() {
     this.initialize()
-    //this.AtualizaGrafico()
+
   },
 
   methods: {
     initialize() {
-
       this.buscarTransacoes()
       this.buscarCategorias()
-      //this.AtualizaGrafico()
+
 
     },
 
@@ -422,7 +420,7 @@ export default {
     buscarCategorias() {
       CategoriaHttpUtil.buscarTodasCategorias().then(categorias => {
         this.categorias = this.retornarElementos(categorias);
-
+        this.calcularTotal()
       }).catch(() => {
         swal({
           title: "Erro interno!",
@@ -491,10 +489,6 @@ export default {
 
     //==>Grava a transação
     salvarTransacao() {
-      let DataSemFormatar //Variavel necessaria para retornar ao valor original (Componente calendario não funciona com a data formatada)
-
-      DataSemFormatar = this.itemEdicao.data
-      this.itemEdicao.data = this.dataFormatada
       TransacaoHttpUtil.adicionarTransacao(this.itemEdicao).then(resposta => {
         if ((resposta.status) < 299) {
           swal({
@@ -504,8 +498,7 @@ export default {
           })
 
           this.initialize()
-          //this.cancelar()
-          this.itemEdicao.data = DataSemFormatar
+          this.calcularTotal()
         }
 
 
@@ -525,6 +518,7 @@ export default {
     calcularTotal() {
       this.totalReceitas = 0;
       this.totalDespesas = 0;
+      const data = [];
 
       this.transacoes.forEach(transacao => {
         if (transacao.tipo === 'Receita') {
@@ -533,8 +527,9 @@ export default {
           this.totalDespesas += parseFloat(transacao.valor);
         }
       });
-    },
 
+      this.AtualizarGrafico();
+    },
 
     AtualizarGrafico() {
       const categories = [];
@@ -550,8 +545,10 @@ export default {
         if (categoriaIndex === -1) {
           // Se não existir, adicioná-la ao array de categorias
           categories.push(categoria);
+          this.options.xaxis.categories.push(categoria)
           // Inicializar o valor correspondente no array de data
           data.push(valor);
+
         } else {
           // Se já existir, adicionar o valor ao valor existente no array de data
           data[categoriaIndex] += valor;
@@ -559,7 +556,8 @@ export default {
       }
 
       // Atualizar o estado do gráfico com as novas categorias e dados
-      this.options.xaxis.categories = categories;
+
+      //this.options.xaxis.categories = categories;
       this.series[0].data = data;
     },
 
@@ -583,6 +581,7 @@ export default {
             });
 
             this.initialize();
+            this.calcularTotal()
           }
 
 
@@ -616,6 +615,7 @@ export default {
             });
             this.confirmarExclusaoDialog = false;
             this.initialize();
+            this.calcularTotal()
           }
 
           this.fecharDialogExclusao()
@@ -663,11 +663,10 @@ export default {
 
     formatarData() {
       const [ano, mes, dia] = this.itemEdicao.data.split('-')
-      this.dataFormatada = `${dia}/${mes}/${ano}`;
+      //this.dataFormatada = `${dia}/${mes}/${ano}`;
       this.itemEdicao.dia = dia
       this.itemEdicao.mes = mes
       this.itemEdicao.ano = ano
-      //this.dataFormatada = DateFormatterUtil.ISOtoBR(this.contaAtual.data)
       this.menuDataDialog = false
     }
 

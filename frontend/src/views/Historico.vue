@@ -16,7 +16,7 @@
                                 <v-row class="mt-2">
 
                                     <v-col cols="12" sm="5">
-                                        <!--Campo de data(Calendario)-->
+                                        <!--Primeiro campo de data(Calendario)-->
                                         <v-menu ref="menuDataDialog" v-model="menuDataDialog"
                                             :close-on-content-click="false" transition="scale-transition" offset-y
                                             max-width="290px" min-width="auto">
@@ -35,7 +35,7 @@
 
 
                                     <v-col cols="12" sm="5">
-                                        <!--Campo de data(Calendario)-->
+                                        <!--Segundo campo de data(Calendario)-->
                                         <v-menu ref="menuDataDialog" v-model="menuDataDialog"
                                             :close-on-content-click="false" transition="scale-transition" offset-y
                                             max-width="290px" min-width="auto">
@@ -338,19 +338,27 @@
 
             <!--Totalizadores ao fim da Página-->
             <v-col cols="12" md="6">
-                <div>
-                    <apexchart width="500" type="bar" :options="options" :series="series"></apexchart>
+
+                <v-col cols="12" md="11">
+                    <v-card color="green" class="my-4">
+                        <v-card-title>Receitas: R${{ totalReceitas }}</v-card-title>
+                    </v-card>
+
+                    <v-card color="red" class="my-4">
+                        <v-card-title>Despesas: R${{ totalDespesas }}</v-card-title>
+                    </v-card>
+                </v-col>
+
+                <div id="chart">
+                    <apexchart type="polarArea" width="380" :options="chartOptions" :series="series"></apexchart>
                 </div>
 
-                <!--Totalizadores ao fim da página-->
-                <v-card color="green" class="my-4">
-                    <v-card-title>Receitas: R${{ totalReceitas }}</v-card-title>
-                </v-card>
 
-                <v-card color="red" class="my-4">
-                    <v-card-title>Despesas: R${{ totalDespesas }}</v-card-title>
-                </v-card>
             </v-col>
+   
+
+
+
 
         </v-row>
     </div>
@@ -362,6 +370,7 @@
 import swal from 'sweetalert'
 import CategoriaHttpUtil from '../util/CategoriaHttpUtil'
 import TransacaoHttpUtil from '../util/TransacaoHttpUtil';
+import { TimeScale } from 'chart.js';
 
 export default {
     data: () => ({
@@ -399,14 +408,46 @@ export default {
 
 
         //Indices do Gráfico
-        options: {
-            xaxis: {
-                categories: []
+        series: [],
+        chartOptions: {
+            chart: {
+                width: 380,
+                type: 'polarArea'
+            },
+            labels: [],
+            fill: {
+                opacity: 1
+            },
+            stroke: {
+                width: 1,
+                colors: undefined
+            },
+            yaxis: {
+                show: false
+            },
+            legend: {
+                position: 'bottom'
+            },
+            plotOptions: {
+                polarArea: {
+                    rings: {
+                        strokeWidth: 0
+                    },
+                    spokes: {
+                        strokeWidth: 0
+                    },
+                }
+            },
+            theme: {
+                monochrome: {
+                    enabled: true,
+                    shadeTo: 'light',
+                    shadeIntensity: 0.6
+                }
             }
         },
-        series: [{
-            data: []
-        }]
+   
+
 
 
 
@@ -473,8 +514,9 @@ export default {
 
             TransacaoHttpUtil.buscarTodasTransacoesDoPeriodo(this.dataInicialPesquisaFormatada, this.dataFinalPesquisaFormatada).then(transacoes => {
                 this.transacoes = transacoes
-                console.log(JSON.stringify(this.transacoes));
+
                 this.calcularTotal()
+
 
             }).catch((error) => {
                 swal({
@@ -557,6 +599,8 @@ export default {
                     this.totalDespesas += parseFloat(transacao.valor);
                 }
             });
+
+            this.AtualizarGrafico();
         },
 
 
@@ -574,8 +618,10 @@ export default {
                 if (categoriaIndex === -1) {
                     // Se não existir, adicioná-la ao array de categorias
                     categories.push(categoria);
+                    this.chartOptions.labels.push(categoria)
                     // Inicializar o valor correspondente no array de data
-                    data.push(valor);
+                    this.series.push(valor);
+
                 } else {
                     // Se já existir, adicionar o valor ao valor existente no array de data
                     data[categoriaIndex] += valor;
@@ -583,9 +629,11 @@ export default {
             }
 
             // Atualizar o estado do gráfico com as novas categorias e dados
-            this.options.xaxis.categories = categories;
-            this.series[0].data = data;
+
+            //this.options.xaxis.categories = categories;
+            //this.series[0].data = data;
         },
+
 
         editItem(item) {
             this.editedIndex = this.transacoes.indexOf(item)
@@ -619,8 +667,6 @@ export default {
                     console.log(JSON.stringify(`[EDITAR PRODUTO] => ${error}`))
                 });
         },
-
-
 
         //==>Dialog de confirmar exclusão
         dialogExclusão(item) {
@@ -684,14 +730,8 @@ export default {
 
             this.dialog = false
         },
-        /*
-        formatarData() {
-          const [ano, mes, dia] = this.contaAtual.data.split('-')
-          this.dataFormatada = `${dia}/${mes}/${ano}`;
-          //this.dataFormatada = DateFormatterUtil.ISOtoBR(this.contaAtual.data)
-          this.menuDataDialog = false
-        },
-        */
+
+        //==>Formata a data da inclusão
         formatarData() {
             const [ano, mes, dia] = this.itemEdicao.data.split('-')
             this.dataFormatada = `${dia}-${mes}-${ano}`;
@@ -699,15 +739,16 @@ export default {
             this.menuDataDialog = false
         },
 
+        //==>Formata a data do primeiro campo de calendario
         formatarDataPesquisaInicial() {
-
             const [ano, mes, dia] = this.dataInicialPesquisa.split('-')
             this.dataInicialPesquisaFormatada = `${dia}-${mes}-${ano}`;
             this.menuDataDialog = false
         },
 
-        formatarDataPesquisaFinal() {
 
+        //==>Formata a data do segundo campo de calendario
+        formatarDataPesquisaFinal() {
             const [ano, mes, dia] = this.dataFinalPesquisa.split('-')
             //console.log("A data formatada é:" + "dia = " + dia + " mes: " + mes + " ano: "+ ano)
             this.dataFinalPesquisaFormatada = `${dia}-${mes}-${ano}`;
