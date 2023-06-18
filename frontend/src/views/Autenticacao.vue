@@ -1,5 +1,6 @@
 <template>
   <v-app id="inspire">
+    
     <v-content>
       <v-container class="fill-height" fluid>
         <v-row justify="center">
@@ -17,7 +18,7 @@
 
                         <h4 class="text-center mt-4">Realize o login ou crie uma conta!</h4>
                         <v-form>
-                          <v-text-field label="E-mail" prepend-icon="mdi-email" type="text" color="primary accent-3"
+                          <v-text-field label="E-mail" prepend-icon="mdi-email" type="text"  color="primary accent-3"
                             v-model="usuarioInputLogin.email" :rules="emailRules" />
 
                           <v-text-field label="Senha" prepend-icon="mdi-lock" type="password" color="primary accent-3"
@@ -32,7 +33,7 @@
                     </v-col>
                     <v-col cols="12" md="4" class="primary accent-3">
                       <v-card-text class="white--text mt-12">
-                        <h1 class="text-center display-1">Olá!</h1>
+                        <v-btn @click="teste" class="primary"></v-btn><h1 class="text-center display-1">Olá!</h1>
                         <h5 class="text-center">Crie uma conta conosco e inicie seu controle de contas.</h5>
                       </v-card-text>
                       <div class="text-center">
@@ -79,6 +80,7 @@
                 </v-window-item>
               </v-window>
             </v-card>
+            
           </v-col>
 
         </v-row>
@@ -123,6 +125,10 @@ export default {
   }),
 
   methods: {
+    teste(){
+      this.$router.push('/config')
+    },
+
     loginUsuario() {
       UsuarioHttpUtil.loginUsuario(this.usuarioInputLogin).then(resposta => {
         
