@@ -23,7 +23,7 @@ class TransacaoController {
     static async buscarTodasTransacoesDoMes(req, res) {
         try {
             const data = req.params.data; // Recebe a data fornecida na requisição
-            console.log(data)
+            //console.log(data)
             const partesData = data.split('-'); // Divide a data em dia, mês e ano
             const QueryMes = partesData[1]; // Obtém o mês como número
             const QueryAno = partesData[2]; // Obtém o ano como número
@@ -41,6 +41,44 @@ class TransacaoController {
             
         } catch (error) {
             console.log("[ TRANSAÇÃO ] : BUSCAR TODAS TRANSAÇÕES => ERRO" + error);
+            res.status(500).send("Erro ao buscar transações");
+        }
+    }
+
+    static async buscarTodasTransacoesDoPeriodo(req, res) {
+        try {
+            // Recebe a data fornecida na requisição
+            const {dataInicial, dataFinal } = req.params
+            //const dataFinal = req.params.dataFinalFormatada;
+
+            console.log("Data inicial:" + dataInicial)
+            console.log("Data Final:" + dataFinal)
+            
+
+            const partesDataInicial = dataInicial.split('-'); // Divide a data em dia, mês e ano
+            const QueryDiaInicial = partesDataInicial[0]  // Obtém o dia
+            const QueryMesInicial = partesDataInicial[1]; // Obtém o mês 
+            const QueryAnoInicial = partesDataInicial[2]; // Obtém o ano 
+
+            const partesDataFinal = dataFinal.split('-'); // Divide a data em dia, mês e ano
+            const QueryDiaFinal = partesDataFinal[0]  // Obtém o dia
+            const QueryMesFinal = partesDataFinal[1]; // Obtém o mês 
+            const QueryAnoFinal = partesDataFinal[2]; // Obtém o ano 
+         
+            //Como o operador "IGUAL A" exige que utilize o FindOnde, foi necessario realizar o maior igual e menor igual para reproduzir esse comportamento
+            res.status(200).json(await TransacaoModel.find(
+                { $and: [
+                    {dia : {$gte :QueryDiaInicial}}, {dia : {$lte: QueryDiaFinal}},
+                    {mes : {$gte: QueryMesInicial}}, {mes : {$lte: QueryMesFinal}},
+                    {ano : {$gte: QueryAnoInicial}}, {ano : {$lte: QueryAnoFinal}} 
+                ]}
+            ).populate('categoria'))
+
+           
+    
+            
+        } catch (error) {
+            console.log("[ BUSCAR TRANSAÇÃO POR PERIODO ] : BUSCAR TRANSAÇÕES => ERRO" + error);
             res.status(500).send("Erro ao buscar transações");
         }
     }

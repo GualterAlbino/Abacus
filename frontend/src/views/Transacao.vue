@@ -352,7 +352,7 @@ export default {
     transacaoExluir: null,
 
     inputMeses: ["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"],
-    inputMesFiltro: '',
+    inputMesFiltro: '06',
     inputAnoFiltro: new Date().getFullYear(),
 
 
@@ -396,6 +396,7 @@ export default {
   watch: {
     dialog(val) {
       val || this.close()
+     
     },
     dialogDelete(val) {
       val || this.closeDelete()
@@ -448,7 +449,7 @@ export default {
 
       TransacaoHttpUtil.buscarTodasTransacoesDoMes(data).then(transacoes => {
         this.transacoes = transacoes
-        console.log(JSON.stringify(this.transacoes));
+        //console.log(JSON.stringify(this.transacoes));
         this.calcularTotal()
 
       }).catch((error) => {

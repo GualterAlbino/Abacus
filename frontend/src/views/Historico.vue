@@ -10,25 +10,52 @@
                         <!--Parte superior da tabela-->
                         <template v-slot:top>
                             <v-toolbar flat>
-                                
+
 
                                 <v-spacer></v-spacer>
                                 <v-row class="mt-2">
-                                    <v-col cols="12" sm="4">
-                                        <v-select :items="inputMeses" label="Mês" v-model="inputMesFiltro" outlined
-                                            hide-details></v-select>
+
+                                    <v-col cols="12" sm="5">
+                                        <!--Campo de data(Calendario)-->
+                                        <v-menu ref="menuDataDialog" v-model="menuDataDialog"
+                                            :close-on-content-click="false" transition="scale-transition" offset-y
+                                            max-width="290px" min-width="auto">
+
+                                            <template v-slot:activator="{ on }">
+                                                <v-text-field v-model="dataInicialPesquisa" label="Data"
+                                                    prepend-icon="mdi-calendar" outlined readonly v-on="on"
+                                                    hide-details></v-text-field>
+                                            </template>
+
+                                            <v-date-picker v-model="dataInicialPesquisa" no-title
+                                                @input="formatarDataPesquisaInicial"></v-date-picker>
+                                        </v-menu>
+
                                     </v-col>
 
-                            
-                                    <v-col cols="12" sm="4">
-                                        <v-text-field outlined v-model="inputAnoFiltro" label="Ano"
-                                            hide-details></v-text-field>
+
+                                    <v-col cols="12" sm="5">
+                                        <!--Campo de data(Calendario)-->
+                                        <v-menu ref="menuDataDialog" v-model="menuDataDialog"
+                                            :close-on-content-click="false" transition="scale-transition" offset-y
+                                            max-width="290px" min-width="auto">
+                                            <template v-slot:activator="{ on }">
+                                                <v-text-field v-model="dataFinalPesquisa" label="Data"
+                                                    prepend-icon="mdi-calendar" outlined readonly v-on="on"
+                                                    hide-details></v-text-field>
+                                            </template>
+                                            <v-date-picker v-model="dataFinalPesquisa" no-title
+                                                @input="formatarDataPesquisaFinal"></v-date-picker>
+                                        </v-menu>
+
                                     </v-col>
 
-                                    <v-col cols="12" sm="4">
-                                        <v-btn color="primary" dark class="mb-2" v-bind="attrs" @click="buscarTransacoes"
-                                            v-on="on">Pesquisar</v-btn>
-                                    </v-col>
+                                    <v-btn color="primary" dark class="mt-2" fab v-bind="attrs" @click="buscarTransacoes"
+                                        v-on="on">
+                                        <v-icon dark>
+                                            mdi-magnify
+                                        </v-icon>
+                                    </v-btn>
 
 
                                 </v-row>
@@ -346,10 +373,13 @@ export default {
         totalDespesas: 0,
         totalReceitas: 0,
         transacaoExluir: null,
-        inputMeses: ["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"],
-        inputMesFiltro : '',
-        inputAnoFiltro: new Date().getFullYear(),
-       
+
+        dataInicialPesquisa: '',
+        dataInicialPesquisaFormatada: '',
+
+        dataFinalPesquisa: '',
+        dataFinalPesquisaFormatada: '',
+
 
         transacao: {},
         categorias: [],
@@ -439,9 +469,9 @@ export default {
 
         //==>Fonção que busca todas as transações cadastradas
         buscarTransacoes() {
-            let data = `00-${this.inputMesFiltro}-${this.inputAnoFiltro}`
+            //let data = `00-${this.inputMesFiltro}-${this.inputAnoFiltro}`
 
-            TransacaoHttpUtil.buscarTodasTransacoesDoMes(data).then(transacoes => {
+            TransacaoHttpUtil.buscarTodasTransacoesDoPeriodo(this.dataInicialPesquisaFormatada, this.dataFinalPesquisaFormatada).then(transacoes => {
                 this.transacoes = transacoes
                 console.log(JSON.stringify(this.transacoes));
                 this.calcularTotal()
@@ -528,7 +558,7 @@ export default {
                 }
             });
         },
-        
+
 
         AtualizarGrafico() {
             const categories = [];
@@ -667,7 +697,23 @@ export default {
             this.dataFormatada = `${dia}-${mes}-${ano}`;
             //this.dataFormatada = DateFormatterUtil.ISOtoBR(this.contaAtual.data)
             this.menuDataDialog = false
+        },
+
+        formatarDataPesquisaInicial() {
+
+            const [ano, mes, dia] = this.dataInicialPesquisa.split('-')
+            this.dataInicialPesquisaFormatada = `${dia}-${mes}-${ano}`;
+            this.menuDataDialog = false
+        },
+
+        formatarDataPesquisaFinal() {
+
+            const [ano, mes, dia] = this.dataFinalPesquisa.split('-')
+            //console.log("A data formatada é:" + "dia = " + dia + " mes: " + mes + " ano: "+ ano)
+            this.dataFinalPesquisaFormatada = `${dia}-${mes}-${ano}`;
+            this.menuDataDialog = false
         }
+
 
     },
 }
